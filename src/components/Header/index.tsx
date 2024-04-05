@@ -1,3 +1,4 @@
+import NavLink from "../NavLink";
 
 
 export default function Header(){
@@ -8,12 +9,12 @@ export default function Header(){
                 alt="Logo projeto" />
             <div>
                 <nav className="flex gap-4">
-                    <a className="text-white">
+                    <NavLink href="/eventos">
                         Eventos
-                    </a>
-                    <a className="text-white">
+                    </NavLink>
+                    <NavLink href="/participantes">
                         Participantes
-                    </a>
+                    </NavLink>
                 </nav>
             </div>
         </div>  
