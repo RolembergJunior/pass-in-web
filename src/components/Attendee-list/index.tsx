@@ -7,29 +7,51 @@ import TalbeHeader from "../Table/Table-header";
 import TableMain from "../Table/Table-main";
 import ButtonIcon from "../Button-icon";
 import TableFooter from "../Table/Table-footer";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { attendees } from "../../data/attendees";
+
+interface listProps{
+    id: number,
+    name: string,
+    email:string,
+    createAt: Date,
+    checkedInAt: Date
+}
 
 export default function AttendeeList(){
     const [searchInputText, setSearchInputText] = useState('');
+    const [filteredList, setFilteredList] = useState<listProps[]>([])
     const [ page, setPage ] = useState(1);
+
+
+
+    useEffect( () => {
+        const filteredAttendees = attendees.filter( (attendee) => attendee.name.toLowerCase().includes(searchInputText.toLowerCase()) );
+        
+        if(searchInputText.length > 0){
+            setFilteredList(filteredAttendees)
+        } else {
+            setFilteredList(attendees)
+        }
+    }, [attendees,searchInputText] )
 
     function onHandleChangeInput(e:React.ChangeEvent<HTMLInputElement>){
         setSearchInputText(e.target.value)
+
+        setPage(1);
+       
     }
 
     dayjs.extend(relativeTime);
     dayjs.locale('pt-br');
+    
 
-    const totalPages = attendees.length / 10;
+    const totalPages = filteredList.length / 10;
     
     function toFirstPage(){
         setPage(1)
     }
 
-    function toLastPage(){
-        setPage( totalPages )
-    }
 
 
     return(
@@ -40,7 +62,7 @@ export default function AttendeeList(){
                     <Search className="size-6 text-emerald-300"/>
                     <input 
                         onChange={(e) => onHandleChangeInput(e)} 
-                        className="bg-transparent flex-1 outline-none border-0 p-0 text-small focus:border-none" 
+                        className="bg-transparent flex-1 outline-none border-0 p-0 text-small focus:ring-0" 
                         type="text"
                         value={searchInputText} 
                         placeholder="Buscar participantes"
@@ -61,7 +83,7 @@ export default function AttendeeList(){
                         </tr>
                     </thead>
                     <tbody>
-                        {attendees.slice((page - 1) * 10, page * 10).map( (attendee) =>{
+                        {filteredList.slice((page - 1) * 10, page * 10).map( (attendee) =>{
                             return(
                             <tr key={attendee.id} className="border-b border-white/10 hover:bg-white/5" >
                                 <TableMain>
@@ -88,12 +110,12 @@ export default function AttendeeList(){
                     <tfoot>
                         <tr>
                             <TableFooter colSpan={3} className="py-3 px-4 text-sm text-zinc-300">
-                                Mostrando 10 e { attendees.length } itens
+                                Mostrando { page * 10 } e { filteredList.length } itens
                             </TableFooter>
 
                             <TableFooter colSpan={3} className="text-right">
                                 <div className="inline-flex items-center gap-6">
-                                    Página {page} de {Math.ceil(totalPages)}
+                                    Página {Math.ceil(page)} de {Math.ceil(totalPages)}
                                     <div className="flex gap-2">
                                         <ButtonIcon onClick={() => toFirstPage()} disabled={ page === 1 } transparent={false} >
                                             <ChevronsLeft className="size-4" />
@@ -101,10 +123,10 @@ export default function AttendeeList(){
                                         <ButtonIcon onClick={() => setPage( page - 1 )} disabled={ page === 1 } transparent={false} >
                                             <ChevronLeft className="size-4" />
                                         </ButtonIcon>
-                                        <ButtonIcon onClick={() => setPage( page + 1 )} disabled={ page === 20 } transparent={false} >
+                                        <ButtonIcon onClick={() => setPage( page + 1 )} disabled={ Math.ceil(page) === Math.ceil(totalPages) } transparent={false} >
                                             <ChevronRightIcon className="size-4" />
                                         </ButtonIcon>
-                                        <ButtonIcon onClick={() => setPage( totalPages )} disabled={ page === 20 } transparent={false} >
+                                        <ButtonIcon onClick={() => setPage( totalPages )} disabled={ Math.ceil(page) === Math.ceil(totalPages) } transparent={false} >
                                             <ChevronsRight className="size-4" />
                                         </ButtonIcon>
                                     </div>
